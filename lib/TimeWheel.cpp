@@ -14,7 +14,8 @@
 
 enum _eTimingWheelCommand
 {
-    _eiAddFunction = 1
+    _eiAddFunction = 1,
+    _eiDeleteFunction=2
 };
 
 struct _sFunctionInsert
@@ -76,7 +77,7 @@ void _cTimingWheel::JumpToNextFrame()
     Arr_Frame[un_ActiveFrame].un_UserFunctionCount = 0;
     while (ps_UserFunctionSeek != nullptr)
     {
-        if (ps_UserFunctionSeek->un_WheelInsert == un_FrameID && ps_UserFunctionSeek->b_IsRepeat == true)
+        if (ps_UserFunctionSeek->un_WheelInsert == un_FrameID && ps_UserFunctionSeek->b_IsRepeat == true && ps_UserFunctionSeek->b_IsActive==true)
         {
             _cUserFunction *ps_UserFunctionRepeatInsert = new _cUserFunction(*ps_UserFunctionSeek);
             AddFunction(ps_UserFunctionRepeatInsert);
@@ -85,7 +86,18 @@ void _cTimingWheel::JumpToNextFrame()
     }
     ++un_ActiveFrame;
 }
-
+void _cTimingWheel::ClearOneFrameFunction(unsigned long long unll_SetFrame)
+{
+    _cUserFunction *ps_UserFunctionSeek = Arr_Frame[unll_SetFrame % un_Frame].p_UserFunctionRoot;
+    while (ps_UserFunctionSeek != nullptr)
+    {
+        if (ps_UserFunctionSeek->unll_FrameBeforeRun == unll_SetFrame)
+        {
+            ps_UserFunctionSeek->b_IsActive = false;
+        }
+        ps_UserFunctionSeek = ps_UserFunctionSeek->p_Next;
+    }
+}
 void _cTimingWheel::Init(unsigned int un_SetFrame, unsigned int un_SetFrameID)
 {
     Arr_Frame = new _cTimingWheelFrame[un_SetFrame];
@@ -207,7 +219,9 @@ void _cTimingWheelRunner::Run()
         case _eiAddFunction:
             AddFunctionDirectly(s_FunctionInsert.c_InsertFunction.p_UserFunction, s_FunctionInsert.c_InsertFunction.p_UserFunctionArg, s_FunctionInsert.c_InsertFunction.unll_FrameBeforeRun, s_FunctionInsert.c_InsertFunction.b_IsRepeat);
             break;
-
+        case _eiDeleteFunction:
+            DeleteAllFunctionInOneFrameDirectly(s_FunctionInsert.c_InsertFunction.unll_FrameBeforeRun);
+            break;
         default:
             break;
         }
@@ -217,14 +231,48 @@ void _cTimingWheelRunner::Run()
     {
         Arr_TimingWheel[n_Index].JumpToNextFrame();
     }
+
     if (0 != Arr_TimingWheel[0].GetReadyFunction(Arr_UserFunctionWaitArr[0]))
     {
         write(n_PipeToNotify[1], Arr_UserFunctionWaitArr[0], sizeof(_cUserFunction));
         Arr_UserFunctionWaitArr[0] = nullptr;
     }
+    Arr_UserFunctionWaitArr[0] = nullptr;
 }
 _cUserFunction *_cTimingWheelRunner::GetWaitFunction(int &n_FunctionCount)
 {
+}
+
+void _cTimingWheelRunner::DeleteAllFunctionInOneFrameDirectly(unsigned long long unll_SetFrame)
+{
+    for (int n_Index = 0; unll_SetFrame != 0; unll_SetFrame /= Arr_TimingWheel[n_Index].GetFrameCount())
+    {
+        Arr_TimingWheel[n_Index].ClearOneFrameFunction(unll_SetFrame);
+        ++n_Index;
+    }
+}
+
+bool _cTimingWheelRunner::DeleteAllFunctionInOneFrame(unsigned long long unll_SetFrame)
+{
+    if(b_IsRun==false)
+    {
+        DeleteAllFunctionInOneFrameDirectly(unll_SetFrame);
+    }
+    else
+    {
+        _sFunctionInsert s_FunctionInsert;
+        s_FunctionInsert.e_Type = _eiAddFunction;
+
+        s_FunctionInsert.c_InsertFunction.b_IsRepeat = false;
+        s_FunctionInsert.c_InsertFunction.unll_FrameBeforeRun = unll_SetFrame;
+        s_FunctionInsert.c_InsertFunction.p_UserFunction = nullptr;
+        s_FunctionInsert.c_InsertFunction.p_UserFunctionArg = nullptr;
+        if (0 == write(n_PipeToUser[1], &s_FunctionInsert, sizeof(_sFunctionInsert)))
+        {
+            return false;
+        }
+    }
+    
 }
 
 void SysTimeHandlePro(int n_Sig)
@@ -240,16 +288,20 @@ void *TimingWheelNotifyFunction(void *ps_Env)
     while (0 != read(n_PiepToGet, pc_UserFunctionBuffer, sizeof(_cUserFunction)))
     {
         _cUserFunction *pc_UserFuncionSeek = pc_UserFunctionBuffer;
-        while (pc_UserFuncionSeek != nullptr && pc_UserFuncionSeek != NULL)
+        while (pc_UserFuncionSeek->p_Next != nullptr && pc_UserFuncionSeek->p_Next != NULL)
         {
-            pc_UserFuncionSeek->p_UserFunction(pc_UserFuncionSeek->p_UserFunctionArg);
             pc_UserFuncionSeek = pc_UserFuncionSeek->p_Next;
+            if (pc_UserFuncionSeek->p_Above->b_IsActive == true)
+                pc_UserFuncionSeek->p_Above->p_UserFunction(pc_UserFuncionSeek->p_UserFunctionArg);
+            delete pc_UserFuncionSeek->p_Above;
         }
+        pc_UserFuncionSeek->p_UserFunction(pc_UserFuncionSeek->p_UserFunctionArg);
+        delete pc_UserFuncionSeek;
         int n_Re = 1;
         //write(n_PipeToPost, &n_Re, sizeof(int));
     }
 }
-
+/*
 void *test(void *x)
 {
     printf("x\n");
@@ -268,4 +320,4 @@ int main()
         sleep(1);
     }
     return 0;
-}
+}*/

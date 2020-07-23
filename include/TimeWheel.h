@@ -19,6 +19,7 @@ struct _cUserFunction
     unsigned long long unll_FrameBeforeRun;
     void* p_UserFunctionArg;
     bool b_IsRepeat;
+    bool b_IsActive=true;
     unsigned int un_WheelInsert=256;
     _cUserFunction *p_Next;
     _cUserFunction *p_Above;
@@ -52,6 +53,7 @@ public:
     void AddFunction(_cUserFunction *ps_UserFunction);
     void AddFunctionRepeat(_cUserFunction*ps_UserFunction);
     void Init(unsigned int un_SetFrame,unsigned int un_FrameID);
+    void ClearOneFrameFunction(unsigned long long unll_SetFrame);
     inline unsigned int GetFrameCount()
     {
         return un_Frame;
@@ -87,13 +89,14 @@ private:
     void Run();
     _cUserFunction *GetWaitFunction(int &n_FunctionCount);
     void AddFunctionDirectly(void *(*p_FuncAdd)(void *), void*p_Arg,unsigned long long unll_FrameBeforeRun,bool b_SetRepeat);
-
+    void DeleteAllFunctionInOneFrameDirectly(unsigned long long unll_SetFrame);
 public:
     bool AddFunction(void *(*p_FuncAdd)(void *), void*p_Arg, unsigned long long unll_FrameBeforeRun,bool b_SetRepeat);
     void Init(unsigned int un_SetFrame[], int n_SetWheelCount);
     void Set(void *p_Set, int n_Kind);
     void Start();
     void Stop();
+    bool DeleteAllFunctionInOneFrame(unsigned long long  unll_SetFrame);
     _cTimingWheelRunner();
     ~_cTimingWheelRunner();
 };
