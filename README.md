@@ -1,9 +1,9 @@
 # TimeWheel
 >## OverAll<br>
->>This is a time Wheel with C++. And provide c(in the future) and c++ api.<br>
->>Time wheel are some wheels with many frame, which can run functions in any frame.Every wheel have different frames, what's more, the speed of every wheel is totally different from the others.  <br>
->>The lower wheel run faster than upper wheel, and the wheel will change(in other word,it jumps to next frame) when the lower wheel makes a trun except the lowest wheel.<br>
->>The lowest wheel jump to next frame when the system singal reached.
+>>This is a time Wheel with C++. And providing c(in the future) and c++ api.<br>
+>>Time wheel is an object including some wheels with many frame, which can run functions in any frame.Every wheel has different frames, what's more, the speed of every wheel is totally different from the others.  <br>
+>>The lower wheel runs faster than upper wheel, and the wheel will change(in other word,it jumps to next frame) when the lower wheel makes a trun except the lowest wheel.<br>
+>>The lowest wheel jumps to next frame when the system singal reached.
 >## Api<br>
 >> **Init**:                   Init the time wheel, call this function before use this time wheel.<br>
 >> **Start**:                  Let the time wheel start running. Some functions may be different after call this function.<br>
