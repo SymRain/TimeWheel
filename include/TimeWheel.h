@@ -1,10 +1,7 @@
 #include <iostream>
-#include<sys/time.h>
+#include <sys/time.h>
 #include <unistd.h>
 using namespace std;
-
-
-
 
 enum _eTimingWheelElimination
 {
@@ -15,21 +12,21 @@ enum _eTimingWheelElimination
 
 struct _cUserFunction
 {
-    void* (*p_UserFunction)(void *);
+    void *(*p_UserFunction)(void *);
     unsigned long long unll_FrameBeforeRun;
-    void* p_UserFunctionArg;
+    void *p_UserFunctionArg;
     bool b_IsRepeat;
-    bool b_IsActive=true;
-    unsigned int un_WheelInsert=256;
-    _cUserFunction *p_Next;
-    _cUserFunction *p_Above;
+    bool b_IsActive = true;
+    unsigned int un_WheelInsert = 256;
+    _cUserFunction *p_Next=nullptr;
+    _cUserFunction *p_Above=nullptr;
 };
 
 struct _cTimingWheelFrame
 {
     _cUserFunction *p_UserFunctionRoot = nullptr;
-    _cUserFunction *p_UserFunctionRepeatRoot=nullptr;
-    unsigned int un_UserFunctionCount =0;
+    _cUserFunction *p_UserFunctionRepeatRoot = nullptr;
+    unsigned int un_UserFunctionCount = 0;
 };
 
 class _cTimingWheel
@@ -51,8 +48,8 @@ public:
     void JumpToNextFrame();
     unsigned int GetReadyFunction(_cUserFunction *&ps_UserFunction);
     void AddFunction(_cUserFunction *ps_UserFunction);
-    void AddFunctionRepeat(_cUserFunction*ps_UserFunction);
-    void Init(unsigned int un_SetFrame,unsigned int un_FrameID);
+    void AddFunctionRepeat(_cUserFunction *ps_UserFunction);
+    void Init(unsigned int un_SetFrame, unsigned int un_FrameID);
     void ClearOneFrameFunction(unsigned long long unll_SetFrame);
     inline unsigned int GetFrameCount()
     {
@@ -77,7 +74,7 @@ private:
     unsigned int un_FunctionWaitArrUsed;
     _eTimingWheelElimination e_ElimiAlg;
     unsigned int un_FrameTime;
-    bool b_IsRun;
+    bool b_IsRun=false;
 
     itimerval s_TimerSetArg;
     int n_PipeToNotify[2];
@@ -86,19 +83,22 @@ private:
     int n_PipeToUser[2];
 
 private:
-    void Run();
+    
     _cUserFunction *GetWaitFunction(int &n_FunctionCount);
-    void AddFunctionDirectly(void *(*p_FuncAdd)(void *), void*p_Arg,unsigned long long unll_FrameBeforeRun,bool b_SetRepeat);
+    void AddFunctionDirectly(void *(*p_FuncAdd)(void *), void *p_Arg, unsigned long long unll_FrameBeforeRun, bool b_SetRepeat);
     void DeleteAllFunctionInOneFrameDirectly(unsigned long long unll_SetFrame);
+    _cTimingWheelRunner();
+
 public:
-    bool AddFunction(void *(*p_FuncAdd)(void *), void*p_Arg, unsigned long long unll_FrameBeforeRun,bool b_SetRepeat);
+    void Run();
+    bool AddFunction(void *(*p_FuncAdd)(void *), void *p_Arg, unsigned long long unll_FrameBeforeRun, bool b_SetRepeat);
     void Init(unsigned int un_SetFrame[], int n_SetWheelCount);
     void Set(void *p_Set, int n_Kind);
     void Start();
     void Stop();
-    bool DeleteAllFunctionInOneFrame(unsigned long long  unll_SetFrame);
-    _cTimingWheelRunner();
+    bool DeleteAllFunctionInOneFrame(unsigned long long unll_SetFrame);
+    static _cTimingWheelRunner &GetInterface();
+
     ~_cTimingWheelRunner();
 };
 
-_cTimingWheelRunner* pc_TimingWheelRunner = new _cTimingWheelRunner;
