@@ -1,4 +1,4 @@
-libtimewheel.a: TimeWheel.o TimeWheelCppApi.o
+libsrtimewheel.a.0.1: TimeWheel.o TimeWheelCppApi.o
 	ar -cr libtimewheel.a TimeWheel.o TimeWheelCppApi.o 
 Test.o: test.cpp
 	g++ -c test.cpp  -o Test.o -lpthread -std=c++11 -g
