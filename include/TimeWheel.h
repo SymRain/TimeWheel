@@ -1,6 +1,7 @@
 #include <iostream>
 #include <sys/time.h>
 #include <unistd.h>
+#include <./TimeWheelPubDef.h>
 using namespace std;
 
 enum _eTimingWheelElimination
@@ -18,8 +19,8 @@ struct _cUserFunction
     bool b_IsRepeat;
     bool b_IsActive = true;
     unsigned int un_WheelInsert = 256;
-    _cUserFunction *p_Next=nullptr;
-    _cUserFunction *p_Above=nullptr;
+    _cUserFunction *p_Next = nullptr;
+    _cUserFunction *p_Above = nullptr;
 };
 
 struct _cTimingWheelFrame
@@ -74,7 +75,7 @@ private:
     unsigned int un_FunctionWaitArrUsed;
     _eTimingWheelElimination e_ElimiAlg;
     unsigned int un_FrameTime;
-    bool b_IsRun=false;
+    bool b_IsRun = false;
 
     itimerval s_TimerSetArg;
     int n_PipeToNotify[2];
@@ -83,17 +84,19 @@ private:
     int n_PipeToUser[2];
 
 private:
-    
     _cUserFunction *GetWaitFunction(int &n_FunctionCount);
     void AddFunctionDirectly(void *(*p_FuncAdd)(void *), void *p_Arg, unsigned long long unll_FrameBeforeRun, bool b_SetRepeat);
     void DeleteAllFunctionInOneFrameDirectly(unsigned long long unll_SetFrame);
     _cTimingWheelRunner();
+    /////////////////////////Function used in Set///////////////////////////////
+private:
+    bool Set_MinTime(void *ps_Source);
 
 public:
     void Run();
     bool AddFunction(void *(*p_FuncAdd)(void *), void *p_Arg, unsigned long long unll_FrameBeforeRun, bool b_SetRepeat);
     void Init(unsigned int un_SetFrame[], int n_SetWheelCount);
-    void Set(void *p_Set, int n_Kind);
+    bool Set(void *p_Set, enum _eTimeWheelSetKind e_Kind);
     void Start();
     void Stop();
     bool DeleteAllFunctionInOneFrame(unsigned long long unll_SetFrame);
@@ -101,4 +104,3 @@ public:
 
     ~_cTimingWheelRunner();
 };
-
