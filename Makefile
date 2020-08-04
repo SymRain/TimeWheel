@@ -1,5 +1,5 @@
 libsrtimewheel.a.0.1: TimeWheel.o TimeWheelCppApi.o
-	ar -cr libtimewheel.a TimeWheel.o TimeWheelCppApi.o 
+	ar -cr libsrtimewheel.a.0.1 TimeWheel.o TimeWheelCppApi.o 
 Test.o: test.cpp
 	g++ -c test.cpp  -o Test.o -lpthread -std=c++11 -g
 TimeWheel.o: ./include/TimeWheel.h ./lib/TimeWheel.cpp
@@ -9,10 +9,9 @@ TimeWheelCppApi.o: ./lib/TimeWheelApi.cpp ./include/TimeWheel_Api.h
 
 install:
 cp ./include/TimeWheel_Api.h /usr/local/include
-cp ./libtimewheel.a /usr/local/lib/libtimewheel.a
-
+cp ./libsrtimewheel.a.0.1 /usr/local/lib/libsrtimewheel.a.0.1
 uninstall:
-rm -rf /usr/local/include/TimeWheel_Api.h /usr/local/lib/libtimewheel.a
+rm -rf /usr/local/include/TimeWheel_Api.h /usr/local/lib/libsrtimewheel.a.0.1
 
 clean:
-	rm -rf libtimewheel.a TimeWheel.o TimeWheelCppApi.o 
+	rm -rf libsrtimewheel.a.0.1 TimeWheel.o TimeWheelCppApi.o 
