@@ -2,6 +2,7 @@
 #include <sys/time.h>
 #include <unistd.h>
 #include <./TimeWheelPubDef.h>
+#include<atomic>
 using namespace std;
 
 enum _eTimingWheelElimination
@@ -76,7 +77,7 @@ private:
     _eTimingWheelElimination e_ElimiAlg;
     unsigned int un_FrameTime;
     bool b_IsRun = false;
-
+    std::atomic_flag mu_flag_IsCallAreadyRun=ATOMIC_FLAG_INIT;
     itimerval s_TimerSetArg;
     int n_PipeToNotify[2];
     int n_PipeToGetRes[2];
@@ -100,6 +101,14 @@ public:
     void Start();
     void Stop();
     bool DeleteAllFunctionInOneFrame(unsigned long long unll_SetFrame);
+    inline bool IsCalledRun()
+    {
+        return mu_flag_IsCallAreadyRun.test_and_set();
+    }
+    inline void ReleaseCallRun()
+    {
+        mu_flag_IsCallAreadyRun.clear();
+    }
     static _cTimingWheelRunner &GetInterface();
 
     ~_cTimingWheelRunner();

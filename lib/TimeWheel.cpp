@@ -325,7 +325,12 @@ bool _cTimingWheelRunner::DeleteAllFunctionInOneFrame(unsigned long long unll_Se
 
 void SysTimeHandlePro(int n_Sig)
 {
+    if (!_cTimingWheelRunner::GetInterface().IsCalledRun())
+    {
+        return;
+    }
     _cTimingWheelRunner::GetInterface().Run();
+    _cTimingWheelRunner::GetInterface().ReleaseCallRun();
 }
 
 void *TimingWheelNotifyFunction(void *ps_Env)
