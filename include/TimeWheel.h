@@ -57,7 +57,7 @@ public:
     {
         return un_Frame;
     }
-    _cTimingWheel(){};
+    _cTimingWheel() {};
     ~_cTimingWheel()
     {
         delete[] Arr_Frame;
@@ -92,7 +92,9 @@ private:
     /////////////////////////Function used in Set///////////////////////////////
 private:
     bool Set_MinTime(void *ps_Source);
-
+public:
+    _cTimingWheelRunner& _cTimingWheelRunner(const _cTimingWheelRunner&)=delete;
+    _cTimingWheelRunner& operator=(const _cTimingWheelRunner&)=delete;
 public:
     void Run();
     bool AddFunction(void *(*p_FuncAdd)(void *), void *p_Arg, unsigned long long unll_FrameBeforeRun, bool b_SetRepeat);
